@@ -26,7 +26,7 @@ export async function login(req, res) {
         }
         let token = await generate_access_and_refresh_token(user._id);
         if (token.success !== undefined && !token.success) {
-            throw new Error('Tokwn generation failed')
+            throw new Error(token.message)
         }
         return res.status(ApiResponseCode.CREATED)
             .json(new api_response(true, ApiResponseCode.CREATED, 'User login Successfully', token))
@@ -69,9 +69,8 @@ export async function refresh_token(req, res) {
         }
 
         let token = await generate_access_and_refresh_token(verified_token?._id);
-        
         if (token.success !== undefined && !token.success) {
-            throw new Error('Tokwn generation failed')
+            throw new Error(token.message)
         }
         return res.status(ApiResponseCode.OK)
             .json(new api_response(true, ApiResponseCode.OK, 'Token refreshed Successfully',token))
@@ -86,14 +85,14 @@ export async function generate_access_and_refresh_token(user_id) {
         if (!user_id) {
             throw new Error('Invalid user');
         }
-        const user = await User.findById(user_id).select('-password,-__v');
+        const user = await User.findById(user_id).select('-__v -password');
         let refresh_token = user.generateRefreshToken();
         user.refreshToken = refresh_token.refresh_token;
         user.save();
         let access_token = user.generateAccessToken();
         await Token.create({
             token:access_token.access_token,
-            userId:user._id,
+            user_id:user._id,
         })
         
         return {

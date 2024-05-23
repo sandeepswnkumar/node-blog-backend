@@ -4,6 +4,6 @@ export default class api_response{
         this.success = success,
         this.status_code = status_code,
         this.message = message,
-        this.data = data
+        this.data = data == null ? [] : data  
     }
 }

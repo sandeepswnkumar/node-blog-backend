@@ -1,4 +1,4 @@
-import { Schema, model } from "mongoose";
+import mongoose, { Schema } from "mongoose";
 
 const commentLikeSchema = Schema({
     comment_id :{
@@ -15,4 +15,4 @@ const commentLikeSchema = Schema({
     }
 })
 
-export const CommentLike = model('CommentLike',commentLikeSchema);
+export const CommentLike = mongoose.model('CommentLike',commentLikeSchema);

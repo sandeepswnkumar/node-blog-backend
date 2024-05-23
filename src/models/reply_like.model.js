@@ -1,4 +1,4 @@
-import { Schema, model } from "mongoose";
+import mongoose,{ Schema } from "mongoose";
 
 const replyLikeSchema = Schema({
     comment_id :{
@@ -19,4 +19,4 @@ const replyLikeSchema = Schema({
     }
 })
 
-export const ReplyLike = model('ReplyLike',replyLikeSchema);
+export const ReplyLike = mongoose.model('ReplyLike',replyLikeSchema);
