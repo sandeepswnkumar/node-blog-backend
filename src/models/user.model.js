@@ -2,8 +2,6 @@
 import mongoose, { Schema } from "mongoose";
 import bcrypt from 'bcrypt';
 import jwt from "jsonwebtoken";
-import { Token } from "./token.model.js";
-import moment from "moment";
 
 const userSchema = new Schema({
     name: {
@@ -25,6 +23,15 @@ const userSchema = new Schema({
     }
 },{timestamps:{createdAt:"created_at",updatedAt:"updated_at"}})
 
+userSchema.index(
+    {
+        email: 1,
+    },
+    {
+        unique: true,
+    }
+)
+
 userSchema.pre('save', async function () {
     if (this.isModified('password')) {
         this.password = await bcrypt.hash(this.password,10)
@@ -34,6 +41,13 @@ userSchema.pre('save', async function () {
 userSchema.methods.isPasswordCorrect = async function(password){
     return await bcrypt.compare(password, this.password);
 }
+
+userSchema.methods.toJSON = function() {
+    const obj = this.toObject();
+    delete obj.password;
+    delete obj.__v;
+    return obj;
+};
 
 userSchema.methods.generateAccessToken = function(){
     try {

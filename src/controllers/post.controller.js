@@ -1,7 +1,7 @@
 
 
 import { validationResult } from "express-validator";
-import ApiResponseCode from "../enums/ApiResponseCode.js";
+import ApiResponseCode from "../enums/api_response_code.js";
 import api_response from "../utils/api_response.js";
 import { Post } from "../models/post.model.js";
 

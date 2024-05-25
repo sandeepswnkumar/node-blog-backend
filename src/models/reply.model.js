@@ -1,6 +1,10 @@
 import {Schema,model} from "mongoose";
 
 const replySchema = new Schema({
+    reply:{
+        type:String,
+        required:true
+    },
     post_id:{
         type: Schema.Types.ObjectId,
         ref: 'Post'

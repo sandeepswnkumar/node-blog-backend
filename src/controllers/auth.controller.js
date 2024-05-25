@@ -1,20 +1,15 @@
 import { User } from "../models/user.model.js";
 import api_response from "../utils/api_response.js";
-import ApiResponseCode from "../enums/ApiResponseCode.js";
+import ApiResponseCode from "../enums/api_response_code.js";
 import jwt from "jsonwebtoken";
 import { Token } from "../models/token.model.js";
+import { validationResult } from "express-validator";
 
 export async function login(req, res) {
     try {
-        if (!req.body) {
-            throw new Error('body not found');
-        }
-        const { email, password } = req.body;
-        if (!email) {
-            throw new Error('Email not found');
-        }
-        if (!password) {
-            throw new Error('Password not found');
+        const validation_error = validationResult(req);
+        if (!validation_error.isEmpty()) {
+            throw new TypeError(JSON.stringify(validation_error.array()))
         }
         const user = await User.findOne({ email }).select('-password,-__v');
         if(!user){
@@ -31,8 +26,12 @@ export async function login(req, res) {
         return res.status(ApiResponseCode.CREATED)
             .json(new api_response(true, ApiResponseCode.CREATED, 'User login Successfully', token))
     } catch (error) {
+        let message = error.message;
+        if (error.name == "TypeError") {
+            message = JSON.parse(error.message);
+        }
         return res.status(ApiResponseCode.BAD_REQUEST)
-            .json(new api_response(false, ApiResponseCode.BAD_REQUEST, error.message))
+            .json(new api_response(false, ApiResponseCode.BAD_REQUEST, message))
     }
 }
 
@@ -53,10 +52,9 @@ export async function logout(req, res) {
 
 export async function refresh_token(req, res) {
     try {
-        
-        const {refresh_token} = req.body;
-        if (!refresh_token) {
-            throw new Error('Access Denied. No, token provided.');
+        const validation_error = validationResult(req);
+        if (!validation_error.isEmpty()) {
+            throw new TypeError(JSON.stringify(validation_error.array()))
         }
         let verified_token = jwt.verify(refresh_token,process.env.REFRESH_TOKEN_SECRET);
 
@@ -75,8 +73,12 @@ export async function refresh_token(req, res) {
         return res.status(ApiResponseCode.OK)
             .json(new api_response(true, ApiResponseCode.OK, 'Token refreshed Successfully',token))
     } catch (error) {
+        let message = error.message;
+        if (error.name == "TypeError") {
+            message = JSON.parse(error.message);
+        }
         return res.status(ApiResponseCode.BAD_REQUEST)
-            .json(new api_response(false, ApiResponseCode.BAD_REQUEST, error.message))
+            .json(new api_response(false, ApiResponseCode.BAD_REQUEST, message))
     }
 }
 
@@ -110,28 +112,20 @@ export async function generate_access_and_refresh_token(user_id) {
 
 export async function register(req, res) {
     try {
-        if (!req.body) {
-            throw new Error('body not found');
+        const validation_error = validationResult(req);
+        if (!validation_error.isEmpty()) {
+            throw new TypeError(JSON.stringify(validation_error.array()))
         }
-        const { name, email, password } = req.body;
-        if (!name) {
-            throw new Error('Name not found');
-        }
-        if (!email) {
-            throw new Error('Email not found');
-        }
-        if (!password) {
-            throw new Error('Password not found');
-        }
-        const user = await User.create({
-            name,
-            email,
-            password
-        })
+        const user = await User.create(req.body)
+        const userObj = user.toJSON()
         return res.status(ApiResponseCode.CREATED)
-            .json(new api_response(true, ApiResponseCode.CREATED, 'User Created Successfully'))
+            .json(new api_response(true, ApiResponseCode.CREATED, 'User Created Successfully',userObj))
     } catch (error) {
+        let message = error.message;
+        if (error.name == "TypeError") {
+            message = JSON.parse(error.message);
+        }
         return res.status(ApiResponseCode.BAD_REQUEST)
-            .json(new api_response(false, ApiResponseCode.BAD_REQUEST, error.message))
+            .json(new api_response(false, ApiResponseCode.BAD_REQUEST, message))
     }
 }

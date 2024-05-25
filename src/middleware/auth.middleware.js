@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken';
 import { User } from '../models/user.model.js';
-import ApiResponseCode from '../enums/ApiResponseCode.js';
+import ApiResponseCode from '../enums/api_response_code.js';
 import { Token } from '../models/token.model.js';
 
 export async function auth(req,res,next){

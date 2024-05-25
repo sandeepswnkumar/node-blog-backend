@@ -4,6 +4,7 @@ const ApiResponseCode = {
     NOT_FOUND : 404,
     CREATED : 201,
     UNAUTHORIZED : 401,
+    SERVER_ERROR : 500,
 }
 
 export default ApiResponseCode;
