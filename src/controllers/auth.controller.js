@@ -8,15 +8,16 @@ import { validationResult } from "express-validator";
 export async function login(req, res) {
     try {
         const validation_error = validationResult(req);
+
         if (!validation_error.isEmpty()) {
             throw new TypeError(JSON.stringify(validation_error.array()))
         }
         const user = await User.findOne({ email }).select('-password,-__v');
-        if(!user){
+        if (!user) {
             throw new Error('Invalid user');
         }
         let isPasswordCorrect = await user.isPasswordCorrect(password);
-        if(!isPasswordCorrect){
+        if (!isPasswordCorrect) {
             throw new Error('Invalid password');
         }
         let token = await generate_access_and_refresh_token(user._id);
@@ -41,7 +42,7 @@ export async function logout(req, res) {
         if (!token) {
             throw new Error('Access Denied. No, token provided.');
         }
-        token = await Token.findOneAndDelete({token});
+        token = await Token.findOneAndDelete({ token });
         return res.status(ApiResponseCode.OK)
             .json(new api_response(true, ApiResponseCode.OK, 'User Log out Successfully'))
     } catch (error) {
@@ -56,22 +57,26 @@ export async function refresh_token(req, res) {
         if (!validation_error.isEmpty()) {
             throw new TypeError(JSON.stringify(validation_error.array()))
         }
-        let verified_token = jwt.verify(refresh_token,process.env.REFRESH_TOKEN_SECRET);
+
+        let verified_token = jwt.verify(refresh_token, process.env.REFRESH_TOKEN_SECRET);
 
         let user = await User.findOne({
             _id: verified_token._id,
-            refreshToken:refresh_token
+            refreshToken: refresh_token
         });
-        if(!user){
+
+        if (!user) {
             throw new Error('Invalid user');
         }
 
         let token = await generate_access_and_refresh_token(verified_token?._id);
+
         if (token.success !== undefined && !token.success) {
             throw new Error(token.message)
         }
         return res.status(ApiResponseCode.OK)
-            .json(new api_response(true, ApiResponseCode.OK, 'Token refreshed Successfully',token))
+            .json(new api_response(true, ApiResponseCode.OK, 'Token refreshed Successfully', token))
+
     } catch (error) {
         let message = error.message;
         if (error.name == "TypeError") {
@@ -91,16 +96,17 @@ export async function generate_access_and_refresh_token(user_id) {
         let refresh_token = user.generateRefreshToken();
         user.refreshToken = refresh_token.refresh_token;
         user.save();
+
         let access_token = user.generateAccessToken();
         await Token.create({
-            token:access_token.access_token,
-            user_id:user._id,
+            token: access_token.access_token,
+            user_id: user._id,
         })
-        
+
         return {
             access_token: access_token.access_token,
-            refresh_token : refresh_token.refresh_token,
-            user : user
+            refresh_token: refresh_token.refresh_token,
+            user: user
         }
     } catch (error) {
         return {
@@ -109,6 +115,7 @@ export async function generate_access_and_refresh_token(user_id) {
         }
     }
 }
+
 
 export async function register(req, res) {
     try {
@@ -119,7 +126,7 @@ export async function register(req, res) {
         const user = await User.create(req.body)
         const userObj = user.toJSON()
         return res.status(ApiResponseCode.CREATED)
-            .json(new api_response(true, ApiResponseCode.CREATED, 'User Created Successfully',userObj))
+            .json(new api_response(true, ApiResponseCode.CREATED, 'User Created Successfully', userObj))
     } catch (error) {
         let message = error.message;
         if (error.name == "TypeError") {
