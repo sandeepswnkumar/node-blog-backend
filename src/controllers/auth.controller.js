@@ -8,7 +8,7 @@ import { validationResult } from "express-validator";
 export async function login(req, res) {
     try {
         const validation_error = validationResult(req);
-        // console.log();
+
         if (!validation_error.isEmpty()) {
             throw new TypeError(JSON.stringify(validation_error.array()))
         }
